@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
+         ToolsVersion="15.0" DefaultTargets="Pack">
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <PackageDir>$(MSBuildThisFileDirectory)dist</PackageDir>
+
+    <BuildNumber Condition="'$(BuildNumber)' == ''">$(BUILD_BUILDNUMBER)</BuildNumber>
+    <BuildNumber Condition="'$(BuildNumber)' == '' AND '$(OfficialBuild)' != 'true'">$([System.DateTime]::UtcNow.ToString(`yyyyMMdd.HHmm`))</BuildNumber>
+
+    <BuildProperties>Configuration=$(Configuration);Platform=AnyCPU;BuildNumber=$(BuildNumber)</BuildProperties>
+    <PackProperties>$(BuildProperties);IncludeSource=true</PackProperties>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectItem Include="Source\NOption\NOption.csproj">
+      <Pack>true</Pack>
+    </ProjectItem>
+    <ProjectItem Include="Source\NOption.Tests\NOption.Tests.csproj"/>
+  </ItemGroup>
+
+  <Target Name="Clean">
+    <MSBuild Projects="@(ProjectItem)"
+             Properties="$(BuildProperties)"
+             Targets="Clean"
+             BuildInParallel="true"
+             StopOnFirstFailure="true"/>
+    <RemoveDir Directories="build\any"/>
+  </Target>
+
+  <Target Name="Restore">
+    <MSBuild Projects="@(ProjectItem)"
+             Properties="$(BuildProperties)"
+             Targets="Restore"
+             BuildInParallel="true"
+             StopOnFirstFailure="true"/>
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="Restore">
+    <MSBuild Projects="@(ProjectItem)"
+             Properties="$(BuildProperties)"
+             BuildInParallel="true"
+             StopOnFirstFailure="true"
+             Targets="Rebuild"/>
+  </Target>
+
+  <Target Name="Pack" DependsOnTargets="Build">
+    <ItemGroup>
+      <_PackItems Include="@(ProjectItem)" Condition="'%(ProjectItem.Pack)' == 'true'"/>
+    </ItemGroup>
+
+    <MSBuild Projects="@(_PackItems)"
+             Properties="$(BuildProperties)"
+             Targets="Pack"
+             BuildInParallel="true"
+             StopOnFirstFailure="true">
+      <Output TaskParameter="TargetOutputs"
+              ItemName="Packages"/>
+    </MSBuild>
+
+    <Copy SourceFiles="@(Packages)" DestinationFolder="$(PackageDir)"/>
+  </Target>
+</Project>
