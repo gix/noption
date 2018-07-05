@@ -70,6 +70,9 @@ namespace NOption.Declarative
         internal override void PopulateValue(
             IMemberRef target, int optionId, IArgumentList args)
         {
+            if (!args.HasArg(optionId))
+                return;
+
             var converter = TypeDescriptor.GetConverter(target.ValueType);
             var value = args.GetLastArgValue(optionId, DefaultValue);
             target.SetValue(converter.ConvertFromInvariantString(value));

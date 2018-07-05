@@ -68,6 +68,9 @@ namespace NOption.Declarative
         internal override void PopulateValue(
             IMemberRef target, int optionId, IArgumentList args)
         {
+            if (!args.HasArg(optionId))
+                return;
+
             bool value = args.GetFlag(optionId, DefaultValue);
             target.SetValue(value);
         }

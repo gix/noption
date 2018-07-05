@@ -43,6 +43,9 @@ namespace NOption.Declarative
         internal override void PopulateValue(
             IMemberRef target, int optionId, IArgumentList args)
         {
+            if (!args.HasArg(optionId))
+                return;
+
             bool allowMultiple =
                 typeof(ICollection<string>).IsAssignableFrom(target.ValueType) ||
                 typeof(ICollection).IsAssignableFrom(target.ValueType);

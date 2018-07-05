@@ -70,6 +70,9 @@ namespace NOption.Declarative
 
         internal override void PopulateValue(IMemberRef target, int optionId, IArgumentList args)
         {
+            if (!args.HasArg(optionId))
+                return;
+
             var values = args.GetAllArgValues(optionId);
 
             if (target.CanWrite) {
