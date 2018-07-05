@@ -1,4 +1,4 @@
-﻿namespace NOption
+namespace NOption
 {
     using System;
     using System.Collections.Generic;
@@ -56,7 +56,7 @@
 
             var chars = new HashSet<char>();
             foreach (var prefix in prefixes)
-                chars.AddRange(prefix);
+                chars.AddRange(prefix.OfType<char>());
             prefixChars = chars.ToArray();
         }
 

@@ -1,6 +1,7 @@
 namespace NOption.Declarative
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
 
@@ -32,7 +33,7 @@ namespace NOption.Declarative
 
         public static bool IsValidName(string name)
         {
-            return !string.IsNullOrEmpty(name) && !name.Any(char.IsWhiteSpace);
+            return !string.IsNullOrEmpty(name) && !name.OfType<char>().Any(char.IsWhiteSpace);
         }
 
         protected static bool TryParse(string prefixedName, out string prefix, out string name)
@@ -58,29 +59,6 @@ namespace NOption.Declarative
 
         public abstract void AddOption(int optionId, OptTableBuilder builder);
 
-        public virtual object GetValue(MemberInfo member, IArgumentList args, int optionId)
-        {
-            Type type;
-            if (member is PropertyInfo property)
-                type = property.PropertyType;
-            else if (member is FieldInfo field)
-                type = field.FieldType;
-            else
-                throw new ArgumentException("Unsupported member type");
-
-            return GetValue(type, args, optionId);
-        }
-
-        public abstract object GetValue(Type type, IArgumentList args, int optionId);
-
-        public virtual void SetValue<T>(T obj, MemberInfo member, object value)
-        {
-            if (member is PropertyInfo property)
-                property.SetValue(obj, value);
-            else if (member is FieldInfo field)
-                field.SetValue(obj, value);
-            else
-                throw new ArgumentException("Unsupported member type");
-        }
+        internal abstract void PopulateValue(IMemberRef target, int optionId, IArgumentList args);
     }
 }

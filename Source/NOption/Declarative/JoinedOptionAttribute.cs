@@ -1,17 +1,14 @@
 namespace NOption.Declarative
 {
     using System;
+    using System.ComponentModel;
     using System.Reflection;
 
-    /// <summary>
-    ///   A flag option with a prefix but no value. This kind is used for options
-    ///   like <c>-x</c>, <c>--opt</c> or <c>/help</c>.
-    /// </summary>
-    public class FlagOptionAttribute : OptionAttribute
+    public class JoinedOptionAttribute : OptionAttribute
     {
         private readonly string[] prefixes;
 
-        public FlagOptionAttribute(string prefixedName)
+        public JoinedOptionAttribute(string prefixedName)
         {
             if (prefixedName == null)
                 throw new ArgumentNullException(nameof(prefixedName));
@@ -23,7 +20,7 @@ namespace NOption.Declarative
             prefixes = new[] { prefix };
         }
 
-        public FlagOptionAttribute(string prefix, string name)
+        public JoinedOptionAttribute(string prefix, string name)
         {
             if (prefix == null)
                 throw new ArgumentNullException(nameof(prefix));
@@ -45,31 +42,30 @@ namespace NOption.Declarative
             }
         }
 
-        public bool DefaultValue { get; set; }
+        public string DefaultValue { get; set; }
 
         public override bool AcceptsMember(MemberInfo member)
         {
-            Type type;
-            if (member is PropertyInfo property)
-                type = property.PropertyType;
-            else if (member is FieldInfo field)
-                type = field.FieldType;
-            else
-                return false;
-
-            return type == typeof(bool) || type == typeof(object);
+            switch (member) {
+                case PropertyInfo _:
+                    return true;
+                case FieldInfo _:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public override void AddOption(int optionId, OptTableBuilder builder)
         {
-            builder.AddFlag(optionId, Prefixes, Name, HelpText);
+            builder.AddJoined(optionId, Prefixes, Name, HelpText);
         }
 
-        internal override void PopulateValue(
-            IMemberRef target, int optionId, IArgumentList args)
+        internal override void PopulateValue(IMemberRef target, int optionId, IArgumentList args)
         {
-            bool value = args.GetFlag(optionId, DefaultValue);
-            target.SetValue(value);
+            var converter = TypeDescriptor.GetConverter(target.ValueType);
+            var value = args.GetLastArgValue(optionId, DefaultValue);
+            target.SetValue(converter.ConvertFromInvariantString(value));
         }
     }
 }

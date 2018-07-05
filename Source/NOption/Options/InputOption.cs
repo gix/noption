@@ -3,7 +3,10 @@ namespace NOption
     using System;
     using System.Collections.Generic;
 
-    /// <summary>An input option with a value but no prefix.</summary>
+    /// <summary>
+    ///   An input option with a value but no prefix. This kind is used for options
+    ///   like <c>file.txt</c>.
+    /// </summary>
     public sealed class InputOption : Option
     {
         public InputOption(

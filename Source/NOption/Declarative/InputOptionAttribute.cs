@@ -7,6 +7,10 @@ namespace NOption.Declarative
     using System.Reflection;
     using Extensions;
 
+    /// <summary>
+    ///   An input option with a value but no prefix. This kind is used for options
+    ///   like <c>file.txt</c>.
+    /// </summary>
     public class InputOptionAttribute : OptionAttribute
     {
         public InputOptionAttribute()
@@ -36,19 +40,17 @@ namespace NOption.Declarative
             builder.AddInput(optionId);
         }
 
-        public override object GetValue(Type type, IArgumentList args, int optionId)
+        internal override void PopulateValue(
+            IMemberRef target, int optionId, IArgumentList args)
         {
             bool allowMultiple =
-                typeof(ICollection<string>).IsAssignableFrom(type) ||
-                typeof(ICollection).IsAssignableFrom(type);
+                typeof(ICollection<string>).IsAssignableFrom(target.ValueType) ||
+                typeof(ICollection).IsAssignableFrom(target.ValueType);
 
             if (allowMultiple)
-                return args.GetAllArgValues(optionId);
-
-            if (args.Matching(optionId).Count() > 1)
-                throw new OptionException();
-
-            return args.GetLastArgValue(optionId);
+                target.SetValue(args.GetAllArgValues(optionId));
+            else
+                target.SetValue(args.GetLastArgValue(optionId));
         }
     }
 }
