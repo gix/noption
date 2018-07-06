@@ -12,42 +12,16 @@ namespace NOption.Declarative
     ///   value and prefix are joined and each value is separated with a comma.
     ///   This kind is used for options like <c>--opt=value1,value2,value3</c>.
     /// </summary>
-    public class CommaJoinedOptionAttribute : OptionAttribute
+    public class CommaJoinedOptionAttribute : PrefixedOptionAttribute
     {
-        private readonly string[] prefixes;
-
         public CommaJoinedOptionAttribute(string prefixedName)
+            : base(prefixedName)
         {
-            if (prefixedName == null)
-                throw new ArgumentNullException(nameof(prefixedName));
-
-            if (!TryParse(prefixedName, out var prefix, out var name))
-                throw new ArgumentException("Invalid name", nameof(prefixedName));
-
-            Name = name;
-            prefixes = new[] { prefix };
         }
 
         public CommaJoinedOptionAttribute(string prefix, string name)
+            : base(prefix, name)
         {
-            if (prefix == null)
-                throw new ArgumentNullException(nameof(prefix));
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-            if (!IsValidName(name))
-                throw new ArgumentException("Invalid name", nameof(name));
-            Name = name;
-            prefixes = new[] { prefix };
-        }
-
-        public string[] Prefixes
-        {
-            get
-            {
-                Contract.Ensures(Contract.Result<string[]>() != null);
-                Contract.Ensures(Contract.Result<string[]>().Length > 0);
-                return prefixes;
-            }
         }
 
         public override bool AcceptsMember(MemberInfo member)

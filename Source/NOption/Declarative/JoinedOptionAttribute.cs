@@ -1,45 +1,23 @@
 namespace NOption.Declarative
 {
-    using System;
     using System.ComponentModel;
     using System.Reflection;
 
-    public class JoinedOptionAttribute : OptionAttribute
+    /// <summary>
+    ///   An option with a prefix and a value. The prefix and value are joined.
+    ///   This kind is used for options like <c>-Ivalue</c>, <c>--opt=value</c>
+    ///   or <c>/out:value</c>.
+    /// </summary>
+    public class JoinedOptionAttribute : PrefixedOptionAttribute
     {
-        private readonly string[] prefixes;
-
         public JoinedOptionAttribute(string prefixedName)
+            : base(prefixedName)
         {
-            if (prefixedName == null)
-                throw new ArgumentNullException(nameof(prefixedName));
-
-            if (!TryParse(prefixedName, out var prefix, out var name))
-                throw new ArgumentException("Invalid name", nameof(prefixedName));
-
-            Name = name;
-            prefixes = new[] { prefix };
         }
 
         public JoinedOptionAttribute(string prefix, string name)
+            : base(prefix, name)
         {
-            if (prefix == null)
-                throw new ArgumentNullException(nameof(prefix));
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-            if (!IsValidName(name))
-                throw new ArgumentException("Invalid name", nameof(name));
-            Name = name;
-            prefixes = new[] { prefix };
-        }
-
-        public string[] Prefixes
-        {
-            get
-            {
-                Contract.Ensures(Contract.Result<string[]>() != null);
-                Contract.Ensures(Contract.Result<string[]>().Length > 0);
-                return prefixes;
-            }
         }
 
         public string DefaultValue { get; set; }

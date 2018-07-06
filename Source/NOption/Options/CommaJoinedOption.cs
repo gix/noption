@@ -34,7 +34,7 @@ namespace NOption
 
         public CommaJoinedOption(
             OptSpecifier id,
-            string[] prefixes,
+            IReadOnlyList<string> prefixes,
             string name,
             string helpText = null,
             OptSpecifier? aliasId = null,
@@ -47,7 +47,7 @@ namespace NOption
                 throw new ArgumentException("Invalid id");
             if (prefixes == null)
                 throw new ArgumentNullException(nameof(prefixes));
-            if (prefixes.Length == 0)
+            if (prefixes.Count == 0)
                 throw new ArgumentException("At least one prefix must be specified");
             if (prefixes.Any(string.IsNullOrWhiteSpace))
                 throw new ArgumentException("All prefixes must be non-empty");
@@ -102,7 +102,7 @@ namespace NOption
         public static OptTableBuilder AddCommaJoined(
             this OptTableBuilder builder,
             OptSpecifier id,
-            string[] prefixes,
+            IReadOnlyList<string> prefixes,
             string name,
             string helpText = null,
             string metaVar = null,

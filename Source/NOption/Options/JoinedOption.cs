@@ -34,7 +34,7 @@ namespace NOption
 
         public JoinedOption(
             OptSpecifier id,
-            string[] prefixes,
+            IReadOnlyList<string> prefixes,
             string name,
             string helpText = null,
             OptSpecifier? aliasId = null,
@@ -47,8 +47,8 @@ namespace NOption
                 throw new ArgumentException("Invalid id");
             if (prefixes == null)
                 throw new ArgumentNullException(nameof(prefixes));
-            if (prefixes.Length == 0)
-                throw new ArgumentException("Contract violated: prefixes.Length > 0");
+            if (prefixes.Count == 0)
+                throw new ArgumentException("Contract violated: prefixes.Count != 0");
             if (prefixes.Any(string.IsNullOrWhiteSpace))
                 throw new ArgumentException("Contract violated: !string.IsNullOrWhiteSpace(prefix)");
             if (name == null)
@@ -124,7 +124,7 @@ namespace NOption
         public static OptTableBuilder AddJoined(
             this OptTableBuilder builder,
             OptSpecifier id,
-            string[] prefixes,
+            IReadOnlyList<string> prefixes,
             string name,
             string helpText = null,
             string metaVar = null,
@@ -135,8 +135,8 @@ namespace NOption
                 throw new ArgumentException("Invalid id");
             if (prefixes == null)
                 throw new ArgumentNullException(nameof(prefixes));
-            if (prefixes.Length == 0)
-                throw new ArgumentException("Contract violated: prefixes.Length > 0");
+            if (prefixes.Count == 0)
+                throw new ArgumentException("Contract violated: prefixes.Count != 0");
             if (prefixes.Any(string.IsNullOrWhiteSpace))
                 throw new ArgumentException("Contract violated: !string.IsNullOrWhiteSpace(prefix)");
             if (name == null)

@@ -10,42 +10,16 @@ namespace NOption.Declarative
     ///   either like <see cref="JoinedOption"/> or <see cref="SeparateOption"/>
     ///   (e.g., <c>-Ipath</c> or <c>-I path</c>).
     /// </summary>
-    public class JoinedOrSeparateOptionAttribute : OptionAttribute
+    public class JoinedOrSeparateOptionAttribute : PrefixedOptionAttribute
     {
-        private readonly string[] prefixes;
-
         public JoinedOrSeparateOptionAttribute(string prefixedName)
+            : base(prefixedName)
         {
-            if (prefixedName == null)
-                throw new ArgumentNullException(nameof(prefixedName));
-
-            if (!TryParse(prefixedName, out var prefix, out var name))
-                throw new ArgumentException("Invalid name", nameof(prefixedName));
-
-            Name = name;
-            prefixes = new[] { prefix };
         }
 
         public JoinedOrSeparateOptionAttribute(string prefix, string name)
+            : base(prefix, name)
         {
-            if (prefix == null)
-                throw new ArgumentNullException(nameof(prefix));
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-            if (!IsValidName(name))
-                throw new ArgumentException("Invalid name", nameof(name));
-            Name = name;
-            prefixes = new[] { prefix };
-        }
-
-        public string[] Prefixes
-        {
-            get
-            {
-                Contract.Ensures(Contract.Result<string[]>() != null);
-                Contract.Ensures(Contract.Result<string[]>().Length > 0);
-                return prefixes;
-            }
         }
 
         public string DefaultValue { get; set; }

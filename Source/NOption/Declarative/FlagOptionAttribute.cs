@@ -7,42 +7,16 @@ namespace NOption.Declarative
     ///   A flag option with a prefix but no value. This kind is used for options
     ///   like <c>-x</c>, <c>--opt</c> or <c>/help</c>.
     /// </summary>
-    public class FlagOptionAttribute : OptionAttribute
+    public class FlagOptionAttribute : PrefixedOptionAttribute
     {
-        private readonly string[] prefixes;
-
         public FlagOptionAttribute(string prefixedName)
+            : base(prefixedName)
         {
-            if (prefixedName == null)
-                throw new ArgumentNullException(nameof(prefixedName));
-
-            if (!TryParse(prefixedName, out var prefix, out var name))
-                throw new ArgumentException("Invalid name", nameof(prefixedName));
-
-            Name = name;
-            prefixes = new[] { prefix };
         }
 
         public FlagOptionAttribute(string prefix, string name)
+            : base(prefix, name)
         {
-            if (prefix == null)
-                throw new ArgumentNullException(nameof(prefix));
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-            if (!IsValidName(name))
-                throw new ArgumentException("Invalid name", nameof(name));
-            Name = name;
-            prefixes = new[] { prefix };
-        }
-
-        public string[] Prefixes
-        {
-            get
-            {
-                Contract.Ensures(Contract.Result<string[]>() != null);
-                Contract.Ensures(Contract.Result<string[]>().Length > 0);
-                return prefixes;
-            }
         }
 
         public bool DefaultValue { get; set; }

@@ -1,7 +1,6 @@
 namespace NOption.Declarative
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
 
@@ -36,7 +35,7 @@ namespace NOption.Declarative
             return !string.IsNullOrEmpty(name) && !name.OfType<char>().Any(char.IsWhiteSpace);
         }
 
-        protected static bool TryParse(string prefixedName, out string prefix, out string name)
+        protected static bool TryParseName(string prefixedName, out string prefix, out string name)
         {
             foreach (var p in new[] { "--", "-", "/" }) {
                 if (prefixedName.Length <= p.Length ||

@@ -37,7 +37,7 @@ namespace NOption.Tests.Declarative
             var args = new[] { "-cjint1=1,2,3", "-cjint2=4,5,6" };
 
             var options = new Options();
-            var al = DeclarativeCommandLineParser.Parse(args, options);
+            var al = CommandLineParser.Parse(args, options);
 
             Assert.Equal(new[] { 1, 2, 3 }, options.CommaJoinedInt1);
             Assert.Equal(new[] { 4, 5, 6 }, options.CommaJoinedInt2);
@@ -50,7 +50,7 @@ namespace NOption.Tests.Declarative
             var args = new[] { "-flag1", "-flag2", "-strjoin:abc", "-intjoin=23", "foo.txt" };
 
             var options = new Options();
-            var al = DeclarativeCommandLineParser.Parse(args, options);
+            var al = CommandLineParser.Parse(args, options);
 
             Assert.Equal(true, options.Flag1);
             Assert.Equal(true, options.Flag2);
@@ -66,7 +66,7 @@ namespace NOption.Tests.Declarative
             var args = new string[0];
 
             var options = new Options();
-            var al = DeclarativeCommandLineParser.Parse(args, options);
+            var al = CommandLineParser.Parse(args, options);
 
             Assert.Equal(false, options.Flag1);
             Assert.Equal(true, options.Flag2);
@@ -82,7 +82,7 @@ namespace NOption.Tests.Declarative
             var args = new[] { "-strjoin:abc", "-strjoin:def", "-intjoin=23", "-intjoin=24", "foo.txt" };
 
             var options = new Options();
-            var al = DeclarativeCommandLineParser.Parse(args, options);
+            var al = CommandLineParser.Parse(args, options);
 
             Assert.Equal("def", options.JoinedString);
             Assert.Equal(24, options.JoinedInt);

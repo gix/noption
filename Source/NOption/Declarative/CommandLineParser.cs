@@ -4,7 +4,7 @@ namespace NOption.Declarative
     using System.Collections.Generic;
     using System.Reflection;
 
-    public class DeclarativeCommandLineParser
+    public class CommandLineParser
     {
         private sealed class Info
         {
@@ -17,7 +17,7 @@ namespace NOption.Declarative
         private readonly OptTableBuilder optTableBuilder = new OptTableBuilder();
         private OptTable optTable;
 
-        public DeclarativeCommandLineParser(object optionBag)
+        public CommandLineParser(object optionBag)
         {
             this.optionBag = optionBag ?? throw new ArgumentNullException(nameof(optionBag));
             ReflectOptTable();
@@ -65,7 +65,7 @@ namespace NOption.Declarative
 
         public static IArgumentList Parse(IReadOnlyList<string> args, object optionBag)
         {
-            return new DeclarativeCommandLineParser(optionBag).Parse(args);
+            return new CommandLineParser(optionBag).Parse(args);
         }
 
         public IArgumentList Parse(IReadOnlyList<string> args)
