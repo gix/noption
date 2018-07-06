@@ -10,6 +10,9 @@ namespace NOption.Declarative
     /// </summary>
     public class JoinedOptionAttribute : PrefixedOptionAttribute
     {
+        private string defaultValue;
+        private bool hasDefaultValue;
+
         public JoinedOptionAttribute(string prefixedName)
             : base(prefixedName)
         {
@@ -20,7 +23,15 @@ namespace NOption.Declarative
         {
         }
 
-        public string DefaultValue { get; set; }
+        public string DefaultValue
+        {
+            get => defaultValue;
+            set
+            {
+                defaultValue = value;
+                hasDefaultValue = true;
+            }
+        }
 
         public override bool AcceptsMember(MemberInfo member)
         {
@@ -41,7 +52,7 @@ namespace NOption.Declarative
 
         internal override void PopulateValue(IMemberRef target, int optionId, IArgumentList args)
         {
-            if (!args.HasArg(optionId))
+            if (!args.HasArg(optionId) && !hasDefaultValue)
                 return;
 
             var converter = TypeDescriptor.GetConverter(target.ValueType);

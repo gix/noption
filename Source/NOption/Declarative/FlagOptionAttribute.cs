@@ -9,6 +9,8 @@ namespace NOption.Declarative
     /// </summary>
     public class FlagOptionAttribute : PrefixedOptionAttribute
     {
+        private bool? defaultValue;
+
         public FlagOptionAttribute(string prefixedName)
             : base(prefixedName)
         {
@@ -19,7 +21,11 @@ namespace NOption.Declarative
         {
         }
 
-        public bool DefaultValue { get; set; }
+        public bool DefaultValue
+        {
+            get => defaultValue.GetValueOrDefault();
+            set => defaultValue = value;
+        }
 
         public override bool AcceptsMember(MemberInfo member)
         {
@@ -42,7 +48,7 @@ namespace NOption.Declarative
         internal override void PopulateValue(
             IMemberRef target, int optionId, IArgumentList args)
         {
-            if (!args.HasArg(optionId))
+            if (!args.HasArg(optionId) && !defaultValue.HasValue)
                 return;
 
             bool value = args.GetFlag(optionId, DefaultValue);
