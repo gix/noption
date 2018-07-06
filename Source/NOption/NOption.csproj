@@ -5,7 +5,7 @@
     <RootNamespace>NOption</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\NOption.snk</AssemblyOriginatorKeyFile>
-    <Authors>Nico Rieck</Authors>
+    <Description>NOption command-line parser</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

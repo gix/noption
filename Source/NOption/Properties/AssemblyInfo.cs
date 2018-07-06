@@ -1,8 +1,5 @@
-﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
-[assembly: AssemblyDescription("NOption command-line parser")]
 
 [assembly: ComVisible(true)]
 [assembly: Guid("8FD102B8-0860-4396-B73C-64AA09B3B663")]
