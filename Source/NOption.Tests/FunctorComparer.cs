@@ -1,4 +1,4 @@
-namespace NOption.Collections
+namespace NOption.Tests
 {
     using System;
     using System.Collections.Generic;

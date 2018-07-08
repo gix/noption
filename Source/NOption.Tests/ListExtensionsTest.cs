@@ -2,6 +2,7 @@ namespace NOption.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using NOption.Extensions;
     using Xunit;
@@ -27,7 +28,7 @@ namespace NOption.Tests
             };
 
             int actualIndex = CollectionExtensions.WeakPredecessor(
-                list, value, (l, r) => l.Item1.CompareTo(r));
+                list, value, Compare);
 
             Assert.Equal(expectedIndex, actualIndex);
         }
@@ -69,7 +70,7 @@ namespace NOption.Tests
             };
 
             int actualIndex = CollectionExtensions.WeakPredecessor(
-                list, index, count, value, (l, r) => l.Item1.CompareTo(r));
+                list, index, count, value, Compare);
 
             Assert.Equal(expectedIndex, actualIndex);
         }
@@ -83,7 +84,7 @@ namespace NOption.Tests
             IReadOnlyList<Tuple<int>> list = new List<Tuple<int>>();
 
             int actual = CollectionExtensions.WeakPredecessor(
-                list, value, (l, r) => l.Item1.CompareTo(r));
+                list, value, Compare);
 
             Assert.Equal(expected, actual);
         }
@@ -100,7 +101,7 @@ namespace NOption.Tests
             Assert.Throws(
                 expectedException,
                 () => CollectionExtensions.WeakPredecessor(
-                    list, index, count, "10", (l, r) => l.CompareTo(r)));
+                    list, index, count, "10", string.Compare));
         }
 
 
@@ -123,7 +124,7 @@ namespace NOption.Tests
             };
 
             int actualIndex = CollectionExtensions.WeakSuccessor(
-                list, value, (l, r) => l.Item1.CompareTo(r));
+                list, value, Compare);
 
             Assert.Equal(expectedIndex, actualIndex);
         }
@@ -165,7 +166,7 @@ namespace NOption.Tests
             };
 
             int actualIndex = CollectionExtensions.WeakSuccessor(
-                list, index, count, value, (l, r) => l.Item1.CompareTo(r));
+                list, index, count, value, Compare);
 
             Assert.Equal(expectedIndex, actualIndex);
         }
@@ -179,7 +180,7 @@ namespace NOption.Tests
             IReadOnlyList<Tuple<int>> list = new List<Tuple<int>>();
 
             int actualIndex = CollectionExtensions.WeakSuccessor(
-                list, value, (l, r) => l.Item1.CompareTo(r));
+                list, value, Compare);
 
             Assert.Equal(expectedIndex, actualIndex);
         }
@@ -196,7 +197,7 @@ namespace NOption.Tests
             Assert.Throws(
                 expectedException,
                 () => CollectionExtensions.WeakSuccessor(
-                    list, index, count, "10", (l, r) => l.CompareTo(r)));
+                    list, index, count, "10", string.Compare));
         }
 
         [Theory]
@@ -274,7 +275,7 @@ namespace NOption.Tests
             IReadOnlyList<Tuple<int>> list = new List<Tuple<int>>();
 
             var range = CollectionExtensions.EqualRange(
-                list, value, (l, r) => l.Item1.CompareTo(r));
+                list, value, Compare);
 
             Assert.Equal(Enumerable.Empty<Tuple<int>>(), range);
         }
@@ -291,7 +292,12 @@ namespace NOption.Tests
             Assert.Throws(
                 expectedException,
                 () => CollectionExtensions.EqualRange(
-                    list, index, count, "10", (l, r) => l.CompareTo(r)));
+                    list, index, count, "10", string.Compare));
+        }
+
+        private static int Compare(Tuple<int> l, int r)
+        {
+            return l.Item1.CompareTo(r);
         }
     }
 }

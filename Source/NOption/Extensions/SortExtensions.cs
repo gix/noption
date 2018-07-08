@@ -2,6 +2,7 @@ namespace NOption.Extensions
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Collections;
 
     public static class SortExtensions
@@ -13,7 +14,7 @@ namespace NOption.Extensions
                 throw new ArgumentNullException(nameof(list));
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
-            list.Sort((x, y) => selector(x).CompareTo(selector(y)));
+            list.Sort(CreateSelectorComparison(selector));
             return list;
         }
 
@@ -24,14 +25,20 @@ namespace NOption.Extensions
                 throw new ArgumentNullException(nameof(list));
             if (selector == null)
                 throw new ArgumentNullException(nameof(selector));
-            return list.StableSort(new SelectorComparer<T, TResult>(selector));
+            return list.StableSort(CreateSelectorComparison(selector));
+        }
+
+        private static Comparison<T> CreateSelectorComparison<T, TResult>(Func<T, TResult> selector)
+            where TResult : IComparable<TResult>
+        {
+            return (x, y) => Comparer<TResult>.Default.Compare(selector(x), selector(y));
         }
 
         public static IList<T> StableSort<T>(this IList<T> list)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
-            return UncheckedMergeSort(list, 0, list.Count, Comparer<T>.Default);
+            return UncheckedMergeSort(list, 0, list.Count, Comparer<T>.Default.Compare);
         }
 
         public static IList<T> StableSort<T>(this IList<T> list, Comparison<T> comparison)
@@ -40,7 +47,7 @@ namespace NOption.Extensions
                 throw new ArgumentNullException(nameof(list));
             if (comparison == null)
                 throw new ArgumentNullException(nameof(comparison));
-            return UncheckedMergeSort(list, 0, list.Count, new FunctorComparer<T>(comparison));
+            return UncheckedMergeSort(list, 0, list.Count, comparison);
         }
 
         public static IList<T> StableSort<T>(this IList<T> list, IComparer<T> comparer)
@@ -49,7 +56,21 @@ namespace NOption.Extensions
                 throw new ArgumentNullException(nameof(list));
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
-            return UncheckedMergeSort(list, 0, list.Count, comparer);
+            return UncheckedMergeSort(list, 0, list.Count, comparer.Compare);
+        }
+
+        public static IList<T> StableSort<T>(
+            this IList<T> list, int index, int count)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), index, "Contract violated: index >= 0");
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Contract violated: count >= 0");
+            if (!(index + count <= list.Count))
+                throw new ArgumentException("Contract violated: index + count <= list.Count");
+            return UncheckedMergeSort(list, index, count, Comparer<T>.Default.Compare);
         }
 
         public static IList<T> StableSort<T>(
@@ -59,7 +80,13 @@ namespace NOption.Extensions
                 throw new ArgumentNullException(nameof(list));
             if (comparison == null)
                 throw new ArgumentNullException(nameof(comparison));
-            return UncheckedMergeSort(list, index, count, new FunctorComparer<T>(comparison));
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), index, "Contract violated: index >= 0");
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Contract violated: count >= 0");
+            if (!(index + count <= list.Count))
+                throw new ArgumentException("Contract violated: index + count <= list.Count");
+            return UncheckedMergeSort(list, index, count, comparison);
         }
 
         public static IList<T> StableSort<T>(
@@ -69,14 +96,20 @@ namespace NOption.Extensions
                 throw new ArgumentNullException(nameof(list));
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
-            return UncheckedMergeSort(list, index, count, comparer);
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), index, "Contract violated: index >= 0");
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Contract violated: count >= 0");
+            if (!(index + count <= list.Count))
+                throw new ArgumentException("Contract violated: index + count <= list.Count");
+            return UncheckedMergeSort(list, index, count, comparer.Compare);
         }
 
         public static IList<T> MergeSort<T>(this IList<T> list)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
-            return UncheckedMergeSort(list, 0, list.Count, Comparer<T>.Default);
+            return UncheckedMergeSort(list, 0, list.Count, Comparer<T>.Default.Compare);
         }
 
         public static IList<T> MergeSort<T>(this IList<T> list, Comparison<T> comparison)
@@ -85,7 +118,7 @@ namespace NOption.Extensions
                 throw new ArgumentNullException(nameof(list));
             if (comparison == null)
                 throw new ArgumentNullException(nameof(comparison));
-            return UncheckedMergeSort(list, 0, list.Count, new FunctorComparer<T>(comparison));
+            return UncheckedMergeSort(list, 0, list.Count, comparison);
         }
 
         public static IList<T> MergeSort<T>(this IList<T> list, IComparer<T> comparer)
@@ -94,7 +127,21 @@ namespace NOption.Extensions
                 throw new ArgumentNullException(nameof(list));
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
-            return UncheckedMergeSort(list, 0, list.Count, comparer);
+            return UncheckedMergeSort(list, 0, list.Count, comparer.Compare);
+        }
+
+        public static IList<T> MergeSort<T>(
+            this IList<T> list, int index, int count)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), index, "Contract violated: index >= 0");
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Contract violated: count >= 0");
+            if (!(index + count <= list.Count))
+                throw new ArgumentException("Contract violated: index + count <= list.Count");
+            return UncheckedMergeSort(list, index, count, Comparer<T>.Default.Compare);
         }
 
         public static IList<T> MergeSort<T>(
@@ -104,7 +151,13 @@ namespace NOption.Extensions
                 throw new ArgumentNullException(nameof(list));
             if (comparison == null)
                 throw new ArgumentNullException(nameof(comparison));
-            return UncheckedMergeSort(list, index, count, new FunctorComparer<T>(comparison));
+            if (index < 0)
+                throw new ArgumentOutOfRangeException(nameof(index), index, "Contract violated: index >= 0");
+            if (count < 0)
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Contract violated: count >= 0");
+            if (!(index + count <= list.Count))
+                throw new ArgumentException("Contract violated: index + count <= list.Count");
+            return UncheckedMergeSort(list, index, count, comparison);
         }
 
         public static IList<T> MergeSort<T>(
@@ -115,23 +168,21 @@ namespace NOption.Extensions
             if (comparer == null)
                 throw new ArgumentNullException(nameof(comparer));
             if (index < 0)
-                throw new ArgumentOutOfRangeException(nameof(index), "Contract violated: index >= 0");
+                throw new ArgumentOutOfRangeException(nameof(index), index, "Contract violated: index >= 0");
             if (count < 0)
-                throw new ArgumentOutOfRangeException(nameof(count), "Contract violated: count >= 0");
-            if (!(list.Count - index < count))
-                throw new ArgumentException("Contract violated: list.Count - index < count");
-            return UncheckedMergeSort(list, index, count, comparer);
+                throw new ArgumentOutOfRangeException(nameof(count), count, "Contract violated: count >= 0");
+            if (!(index + count <= list.Count))
+                throw new ArgumentException("Contract violated: index + count <= list.Count");
+            return UncheckedMergeSort(list, index, count, comparer.Compare);
         }
 
         private static IList<T> UncheckedMergeSort<T>(
-            this IList<T> list, int index, int count, IComparer<T> comparer)
+            this IList<T> list, int index, int count, Comparison<T> compare)
         {
             if (count == 0)
                 return list;
 
-            List<T> sorted = Collections.MergeSort.Sort(list, index, index + count, comparer);
-            for (int i = 0; i < sorted.Count; ++i)
-                list[i] = sorted[i];
+            MergeSorter.Sort(list.ToList(), list, index, index + count, compare);
             return list;
         }
     }
