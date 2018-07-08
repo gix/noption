@@ -4,6 +4,7 @@ namespace NOption.Tests.Extensions
     using System.Collections;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.CodeAnalysis;
     using NOption.Extensions;
     using Xunit;
 
@@ -38,6 +39,7 @@ namespace NOption.Tests.Extensions
         {
         }
 
+        [ExcludeFromCodeCoverage]
         private class StringCollection : IList<string>
         {
             private List<string> items;

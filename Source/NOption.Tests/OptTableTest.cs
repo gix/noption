@@ -2,6 +2,7 @@ namespace NOption.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using Xunit;
 
@@ -321,6 +322,7 @@ namespace NOption.Tests
             Assert.Equal(optTable.MakeArg(1, "-opt", 0, "v1"), al[0], argComparer);
         }
 
+        [ExcludeFromCodeCoverage]
         public static IEnumerable<object[]> ParseMultiArgData
         {
             get
@@ -349,6 +351,7 @@ namespace NOption.Tests
             Assert.Equal(optTable.MakeArg(1, prefix + name, 0, extraArgs), al[0], argComparer);
         }
 
+        [ExcludeFromCodeCoverage]
         public static IEnumerable<object[]> ParseMultiArgMissingArgsData
         {
             get

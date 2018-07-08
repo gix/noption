@@ -1,7 +1,6 @@
 namespace NOption.Tests.Declarative
 {
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.Linq;
     using NOption.Declarative;
     using Xunit;

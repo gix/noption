@@ -13,10 +13,5 @@ namespace NOption
         {
             return default;
         }
-
-        public static T OldValue<T>(T value)
-        {
-            return default;
-        }
     }
 }

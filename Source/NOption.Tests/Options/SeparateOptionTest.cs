@@ -2,12 +2,12 @@ namespace NOption.Tests.Options
 {
     using Xunit;
 
-    public class FlagOptionTest
+    public class SeparateOptionTest
     {
         [Fact]
         public void ConstructMinimal()
         {
-            var option = new FlagOption(1, "-", "foo");
+            var option = new SeparateOption(1, "-", "foo");
 
             Assert.Equal(1, option.Id);
             Assert.Equal("-", option.Prefix);
@@ -22,7 +22,7 @@ namespace NOption.Tests.Options
         [Fact]
         public void ConstructOptional()
         {
-            var option = new FlagOption(
+            var option = new SeparateOption(
                 1, "-", "foo", helpText: "help", aliasId: 2, groupId: 3,
                 metaVar: "meta");
 
@@ -35,63 +35,66 @@ namespace NOption.Tests.Options
             Assert.Null(option.Group);
             Assert.Same(option, option.UnaliasedOption);
 
-            var option2 = new FlagOption(2, "-", "bar");
-            var option3 = new FlagOption(3, "-", "qux");
+            var option2 = new SeparateOption(2, "-", "bar");
+            var option3 = new SeparateOption(3, "-", "qux");
 
             var optTable = new OptTable(new[] { option, option2, option3 });
             Assert.Same(option2, option.Alias);
             Assert.Same(option3, option.Group);
         }
 
-        [Fact]
-        public void Accept()
+        [Theory]
+        [InlineData(new[] { "-foo", "bar" }, "bar")]
+        [InlineData(new[] { "-foo", "bar", "qux" }, "bar")]
+        public void Accept(string[] input, string value)
         {
-            var option = new FlagOption(1, "-", "foo");
+            var option = new SeparateOption(1, "-", "foo");
 
             int idx = 0;
-            var arg = option.Accept(new[] { "-foo" }, ref idx);
+            var arg = option.Accept(input, ref idx);
 
-            Assert.Equal(1, idx);
+            Assert.Equal(2, idx);
             Assert.NotNull(arg);
             Assert.Same(option, arg.Option);
             Assert.Equal(0, arg.Index);
             Assert.False(arg.IsClaimed);
             Assert.Equal("-foo", arg.Spelling);
-            Assert.Null(arg.Value);
+            Assert.Equal(value, arg.Value);
         }
 
         [Theory]
-        [InlineData("")]
-        [InlineData("foo")]
-        [InlineData("/foo")]
-        public void Accept_Returns_Null_On_UnhandledInput(string input)
+        [InlineData(new[] { "" }, 0)]
+        [InlineData(new[] { "foo", "bar" }, 0)]
+        [InlineData(new[] { "/foo", "bar" }, 0)]
+        [InlineData(new[] { "-foo" }, 2)]
+        public void Accept_Returns_Null_On_UnhandledInput(string[] input, int index)
         {
-            var option = new FlagOption(1, "-", "foo");
+            var option = new SeparateOption(1, "-", "foo");
 
             int idx = 0;
-            var arg = option.Accept(new[] { input }, ref idx);
+            var arg = option.Accept(input, ref idx);
 
-            Assert.Equal(0, idx);
+            Assert.Equal(index, idx);
             Assert.Null(arg);
         }
 
         [Theory]
-        [InlineData("-bar", "-bar")]
-        [InlineData("/bar", "/bar")]
-        [InlineData("--bar", "--bar")]
-        public void Alias(string input, string spelling)
+        [InlineData(new[] { "-foo", "bar" }, "-foo")]
+        [InlineData(new[] { "/foo", "bar" }, "/foo")]
+        [InlineData(new[] { "--foo", "bar" }, "--foo")]
+        public void Alias(string[] input, string spelling)
         {
-            var option = new FlagOption(1, new[] { "-", "/", "--" }, "foo");
-            var option2 = new FlagOption(2, new[] { "-", "/", "--" }, "bar", aliasId: 1);
+            var option = new SeparateOption(1, new[] { "-", "/", "--" }, "qux");
+            var option2 = new SeparateOption(2, new[] { "-", "/", "--" }, "foo", aliasId: 1);
             var optTable = new OptTable(new[] { option, option2 });
 
             int idx = 0;
-            var arg = option2.Accept(new[] { input }, ref idx);
+            var arg = option2.Accept(input, ref idx);
 
             Assert.NotNull(arg);
             Assert.Equal(1, arg.Option.Id);
             Assert.Equal(spelling, arg.Spelling);
-            Assert.Null(arg.Value);
+            Assert.Equal("bar", arg.Value);
         }
     }
 }

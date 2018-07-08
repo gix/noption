@@ -6,10 +6,10 @@ namespace NOption.Tests.Declarative
     using System.Linq;
     using Xunit;
 
-    public class CallbackTest
+    public class OptionSetTest
     {
         [Fact]
-        public void FactMethodName()
+        public void Test1()
         {
             bool? help = null;
             string output = null;
@@ -77,10 +77,6 @@ namespace NOption.Tests.Declarative
                 actions.Add(id, Tuple.Create(action));
             }
 
-            //Option p = new ActionOption(prototype, description, 1,
-            //        delegate(OptionValueCollection v) { action(v[0]); }, hidden);
-            //base.Add(p);
-
             return this;
         }
 
@@ -88,7 +84,7 @@ namespace NOption.Tests.Declarative
         {
             var optTable = builder.CreateTable();
 
-            IArgumentList al = optTable.ParseArgs(arguments, out var _);
+            IArgumentList al = optTable.ParseArgs(arguments, out _);
 
             foreach (var arg in al) {
                 if (!actions.TryGetValue(arg.Option.Id, out var tuple))

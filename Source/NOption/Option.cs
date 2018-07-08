@@ -229,8 +229,6 @@ namespace NOption
 
         internal Arg Accept(IReadOnlyList<string> args, ref int argIndex)
         {
-            Contract.Ensures(argIndex >= Contract.OldValue(argIndex));
-
             string argStr = args[argIndex];
             int argLen = 0;
             foreach (var prefix in prefixes) {
@@ -259,7 +257,6 @@ namespace NOption
                 throw new ArgumentNullException(nameof(args));
             if (!(argIndex >= 0 && argIndex < args.Count))
                 throw new ArgumentOutOfRangeException(nameof(argIndex));
-            Contract.Ensures(argIndex >= Contract.OldValue(argIndex));
 
             string argStr = args[argIndex];
             return new Arg(this, argStr, argIndex++, argStr);

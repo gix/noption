@@ -2,12 +2,12 @@ namespace NOption.Tests.Options
 {
     using Xunit;
 
-    public class FlagOptionTest
+    public class JoinedOptionTest
     {
         [Fact]
         public void ConstructMinimal()
         {
-            var option = new FlagOption(1, "-", "foo");
+            var option = new JoinedOption(1, "-", "foo");
 
             Assert.Equal(1, option.Id);
             Assert.Equal("-", option.Prefix);
@@ -22,7 +22,7 @@ namespace NOption.Tests.Options
         [Fact]
         public void ConstructOptional()
         {
-            var option = new FlagOption(
+            var option = new JoinedOption(
                 1, "-", "foo", helpText: "help", aliasId: 2, groupId: 3,
                 metaVar: "meta");
 
@@ -35,21 +35,23 @@ namespace NOption.Tests.Options
             Assert.Null(option.Group);
             Assert.Same(option, option.UnaliasedOption);
 
-            var option2 = new FlagOption(2, "-", "bar");
-            var option3 = new FlagOption(3, "-", "qux");
+            var option2 = new JoinedOption(2, "-", "bar");
+            var option3 = new JoinedOption(3, "-", "qux");
 
             var optTable = new OptTable(new[] { option, option2, option3 });
             Assert.Same(option2, option.Alias);
             Assert.Same(option3, option.Group);
         }
 
-        [Fact]
-        public void Accept()
+        [Theory]
+        [InlineData("-foo", "")]
+        [InlineData("-foobar", "bar")]
+        public void Accept(string input, string value)
         {
-            var option = new FlagOption(1, "-", "foo");
+            var option = new JoinedOption(1, "-", "foo");
 
             int idx = 0;
-            var arg = option.Accept(new[] { "-foo" }, ref idx);
+            var arg = option.Accept(new[] { input }, ref idx);
 
             Assert.Equal(1, idx);
             Assert.NotNull(arg);
@@ -57,7 +59,7 @@ namespace NOption.Tests.Options
             Assert.Equal(0, arg.Index);
             Assert.False(arg.IsClaimed);
             Assert.Equal("-foo", arg.Spelling);
-            Assert.Null(arg.Value);
+            Assert.Equal(value, arg.Value);
         }
 
         [Theory]
@@ -66,7 +68,7 @@ namespace NOption.Tests.Options
         [InlineData("/foo")]
         public void Accept_Returns_Null_On_UnhandledInput(string input)
         {
-            var option = new FlagOption(1, "-", "foo");
+            var option = new JoinedOption(1, "-", "foo");
 
             int idx = 0;
             var arg = option.Accept(new[] { input }, ref idx);
@@ -76,13 +78,13 @@ namespace NOption.Tests.Options
         }
 
         [Theory]
-        [InlineData("-bar", "-bar")]
-        [InlineData("/bar", "/bar")]
-        [InlineData("--bar", "--bar")]
+        [InlineData("-foo=bar", "-foo=")]
+        [InlineData("/foo=bar", "/foo=")]
+        [InlineData("--foo=bar", "--foo=")]
         public void Alias(string input, string spelling)
         {
-            var option = new FlagOption(1, new[] { "-", "/", "--" }, "foo");
-            var option2 = new FlagOption(2, new[] { "-", "/", "--" }, "bar", aliasId: 1);
+            var option = new JoinedOption(1, new[] { "-", "/", "--" }, "foo:");
+            var option2 = new JoinedOption(2, new[] { "-", "/", "--" }, "foo=", aliasId: 1);
             var optTable = new OptTable(new[] { option, option2 });
 
             int idx = 0;
@@ -91,7 +93,7 @@ namespace NOption.Tests.Options
             Assert.NotNull(arg);
             Assert.Equal(1, arg.Option.Id);
             Assert.Equal(spelling, arg.Spelling);
-            Assert.Null(arg.Value);
+            Assert.Equal("bar", arg.Value);
         }
     }
 }
