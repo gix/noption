@@ -40,7 +40,7 @@ namespace NOption {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NArg.Strings", typeof(Strings).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("NOption.Strings", typeof(Strings).GetTypeInfo().Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -62,11 +62,20 @@ namespace NOption {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to =Target array type is not compatible with the type of items in the collection..
+        ///   Looks up a localized string similar to Target array type is not compatible with the type of items in the collection..
         /// </summary>
         internal static string Arg_InvalidArrayType {
             get {
                 return ResourceManager.GetString("Arg_InvalidArrayType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only single dimensional arrays are supported for the requested action..
+        /// </summary>
+        internal static string Arg_RankMultiDimNotSupported {
+            get {
+                return ResourceManager.GetString("Arg_RankMultiDimNotSupported", resourceCulture);
             }
         }
         

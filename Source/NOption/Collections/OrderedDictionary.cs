@@ -297,11 +297,11 @@ namespace NOption.Collections
         /// </exception>
         public void Insert(int index, TKey key, TValue value)
         {
-            if (!(index >= 0 && index < Count))
+            if (!(index >= 0 && index <= Count))
                 throw new ArgumentOutOfRangeException(nameof(index));
 
-            objectsArray.Insert(index, new KeyValuePair<TKey, TValue>(key, value));
             objectsTable.Add(key, value);
+            objectsArray.Insert(index, new KeyValuePair<TKey, TValue>(key, value));
         }
 
         /// <summary>
@@ -386,8 +386,9 @@ namespace NOption.Collections
             set
             {
                 if (objectsTable.ContainsKey(key)) {
+                    int index = IndexOfKey(key);
                     objectsTable[key] = value;
-                    objectsArray[IndexOfKey(key)] = new KeyValuePair<TKey, TValue>(key, value);
+                    objectsArray[index] = new KeyValuePair<TKey, TValue>(objectsArray[index].Key, value);
                 } else {
                     Add(key, value);
                 }
@@ -548,22 +549,17 @@ namespace NOption.Collections
             get => ((IDictionary)objectsTable)[key];
             set
             {
-                if (key == null) {
+                if (key == null)
                     throw new ArgumentNullException(nameof(key));
-                }
 
                 ThrowIfIllegalNull<TValue>(value, "value");
 
-                try {
-                    var realKey = (TKey)key;
-                    try {
-                        this[realKey] = (TValue)value;
-                    } catch (InvalidCastException) {
-                        ThrowWrongValueTypeArgumentException(value, typeof(TValue));
-                    }
-                } catch (InvalidCastException) {
-                    ThrowWrongKeyTypeArgumentException(key, typeof(TKey));
-                }
+                if (!(key is TKey k))
+                    throw CreateWrongKeyTypeException(key, typeof(TKey));
+                if (!(value is TValue v))
+                    throw CreateWrongValueTypeException(value, typeof(TValue));
+
+                this[k] = v;
             }
         }
 
@@ -574,31 +570,29 @@ namespace NOption.Collections
 
         bool IDictionary.Contains(object key)
         {
-            if (!(key is TKey))
-                return false;
-            return ContainsKey((TKey)key);
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
+            return key is TKey k && ContainsKey(k);
         }
 
         void IDictionary.Add(object key, object value)
         {
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
             ThrowIfIllegalNull<TValue>(value, "value");
 
-            try {
-                var realKey = (TKey)key;
-                try {
-                    Add(realKey, (TValue)value);
-                } catch (InvalidCastException) {
-                    ThrowWrongValueTypeArgumentException(value, typeof(TValue));
-                }
-            } catch (InvalidCastException) {
-                ThrowWrongKeyTypeArgumentException(key, typeof(TKey));
-            }
+            if (!(key is TKey k))
+                throw CreateWrongKeyTypeException(key, typeof(TKey));
+            if (value != null && !(value is TValue))
+                throw CreateWrongValueTypeException(value, typeof(TValue));
+
+            Add(k, (TValue)value);
         }
 
         void IDictionary.Remove(object key)
         {
-            if (key is TKey)
-                Remove((TKey)key);
+            if (key is TKey k)
+                Remove(k);
         }
 
         #endregion
@@ -671,7 +665,7 @@ namespace NOption.Collections
 
         void ICollection<KeyValuePair<TKey, TValue>>.CopyTo(KeyValuePair<TKey, TValue>[] array, int arrayIndex)
         {
-            ((ICollection<KeyValuePair<TKey, TValue>>)objectsArray).CopyTo(array, arrayIndex);
+            objectsArray.CopyTo(array, arrayIndex);
         }
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
@@ -680,12 +674,11 @@ namespace NOption.Collections
             if (index < 0 || index >= Count)
                 return false;
 
-            if ((index < 0)
-                || !EqualityComparer<TValue>.Default.Equals(objectsArray[index].Value, item.Value))
+            if (!EqualityComparer<TValue>.Default.Equals(objectsArray[index].Value, item.Value))
                 return false;
 
-            objectsArray.RemoveAt(index);
             objectsTable.Remove(objectsArray[index].Key);
+            objectsArray.RemoveAt(index);
             return true;
         }
 
@@ -722,18 +715,18 @@ namespace NOption.Collections
             return -1;
         }
 
-        private static void ThrowWrongKeyTypeArgumentException(object key, Type targetType)
+        private static Exception CreateWrongKeyTypeException(object key, Type targetType)
         {
             string message = string.Format(
                 CultureInfo.CurrentCulture, Strings.Arg_WrongType, key, targetType);
-            throw new ArgumentException(message, nameof(key));
+            return new ArgumentException(message, nameof(key));
         }
 
-        private static void ThrowWrongValueTypeArgumentException(object value, Type targetType)
+        private static Exception CreateWrongValueTypeException(object value, Type targetType)
         {
             string message = string.Format(
                 CultureInfo.CurrentCulture, Strings.Arg_WrongType, value, targetType);
-            throw new ArgumentException(message, nameof(value));
+            return new ArgumentException(message, nameof(value));
         }
 
         private sealed class Enumerator : IDictionaryEnumerator
@@ -775,16 +768,13 @@ namespace NOption.Collections
 
         [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
         [DebuggerTypeProxy(typeof(CollectionDebuggerProxy<>))]
-        private sealed class KeyCollection : IReadOnlyList<TKey>, IList<TKey>, ICollection
+        private sealed class KeyCollection : IReadOnlyList<TKey>, ICollection<TKey>, ICollection
         {
             private readonly OrderedDictionary<TKey, TValue> dictionary;
 
             public KeyCollection(OrderedDictionary<TKey, TValue> dictionary)
             {
-                if (dictionary == null)
-                    throw new ArgumentNullException(nameof(dictionary));
-
-                this.dictionary = dictionary;
+                this.dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
             }
 
             public int Count => dictionary.Count;
@@ -807,6 +797,12 @@ namespace NOption.Collections
 
             public void CopyTo(TKey[] array, int index)
             {
+                if (array == null)
+                    throw new ArgumentNullException(nameof(array));
+                if (index < 0)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                if (array.Length - index < dictionary.objectsArray.Count)
+                    throw new ArgumentException(nameof(array), "Not enough space in target array");
                 foreach (var entry in dictionary.objectsArray)
                     array[index++] = entry.Key;
             }
@@ -833,15 +829,25 @@ namespace NOption.Collections
 
             void ICollection.CopyTo(Array array, int index)
             {
+                if (array == null)
+                    throw new ArgumentNullException(nameof(array));
+                if (array.Rank != 1)
+                    throw new ArgumentException(nameof(array), Strings.Arg_RankMultiDimNotSupported);
+                if (index < 0)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                if (array.Length - index < dictionary.objectsArray.Count)
+                    throw new ArgumentException(nameof(array), "Not enough space in target array");
+
                 switch (array) {
-                    case TKey[] strongArray:
-                        CopyTo(strongArray, index);
+                    case TKey[] keys:
+                        foreach (var entry in dictionary.objectsArray)
+                            keys[index++] = entry.Key;
                         break;
 
-                    case object[] objArray:
+                    case object[] objs:
                         try {
                             foreach (var entry in dictionary.objectsArray)
-                                objArray[index++] = entry.Key;
+                                objs[index++] = entry.Key;
                         } catch (ArrayTypeMismatchException) {
                             throw new ArgumentException(Strings.Arg_InvalidArrayType);
                         }
@@ -852,27 +858,7 @@ namespace NOption.Collections
                 }
             }
 
-            public int IndexOf(TKey item)
-            {
-                return dictionary.objectsArray.FindIndex(
-                    p => EqualityComparer<TKey>.Default.Equals(p.Key, item));
-            }
-
-            public void Insert(int index, TKey item)
-            {
-                throw new NotSupportedException();
-            }
-
-            public void RemoveAt(int index)
-            {
-                throw new NotSupportedException();
-            }
-
-            public TKey this[int index]
-            {
-                get => dictionary.objectsArray[index].Key;
-                set => throw new NotSupportedException();
-            }
+            public TKey this[int index] => dictionary.objectsArray[index].Key;
 
             [StructLayout(LayoutKind.Sequential)]
             private struct Enumerator : IEnumerator<TKey>
@@ -907,16 +893,13 @@ namespace NOption.Collections
 
         [DebuggerDisplay("Count = {" + nameof(Count) + "}")]
         [DebuggerTypeProxy(typeof(CollectionDebuggerProxy<>))]
-        private sealed class ValueCollection : IReadOnlyList<TValue>, IList<TValue>, ICollection
+        private sealed class ValueCollection : IReadOnlyList<TValue>, ICollection<TValue>, ICollection
         {
             private readonly OrderedDictionary<TKey, TValue> dictionary;
 
             public ValueCollection(OrderedDictionary<TKey, TValue> dictionary)
             {
-                if (dictionary == null)
-                    throw new ArgumentNullException(nameof(dictionary));
-
-                this.dictionary = dictionary;
+                this.dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
             }
 
             public int Count => dictionary.Count;
@@ -939,21 +922,37 @@ namespace NOption.Collections
 
             public void CopyTo(TValue[] array, int index)
             {
+                if (array == null)
+                    throw new ArgumentNullException(nameof(array));
+                if (index < 0)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                if (array.Length - index < dictionary.objectsArray.Count)
+                    throw new ArgumentException(nameof(array), "Not enough space in target array");
                 foreach (var entry in dictionary.objectsArray)
                     array[index++] = entry.Value;
             }
 
             void ICollection.CopyTo(Array array, int index)
             {
+                if (array == null)
+                    throw new ArgumentNullException(nameof(array));
+                if (array.Rank != 1)
+                    throw new ArgumentException(nameof(array), Strings.Arg_RankMultiDimNotSupported);
+                if (index < 0)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                if (array.Length - index < dictionary.objectsArray.Count)
+                    throw new ArgumentException(nameof(array), "Not enough space in target array");
+
                 switch (array) {
-                    case TValue[] strongArray:
-                        CopyTo(strongArray, index);
+                    case TValue[] values:
+                        foreach (var entry in dictionary.objectsArray)
+                            values[index++] = entry.Value;
                         break;
 
-                    case object[] objArray:
+                    case object[] objs:
                         try {
                             foreach (var entry in dictionary.objectsArray)
-                                objArray[index++] = entry.Value;
+                                objs[index++] = entry.Value;
                         } catch (ArrayTypeMismatchException) {
                             throw new ArgumentException(Strings.Arg_InvalidArrayType);
                         }
@@ -984,27 +983,7 @@ namespace NOption.Collections
                 return GetEnumerator();
             }
 
-            public int IndexOf(TValue item)
-            {
-                return dictionary.objectsArray.FindIndex(
-                    p => EqualityComparer<TValue>.Default.Equals(p.Value, item));
-            }
-
-            public void Insert(int index, TValue item)
-            {
-                throw new NotSupportedException();
-            }
-
-            public void RemoveAt(int index)
-            {
-                throw new NotSupportedException();
-            }
-
-            public TValue this[int index]
-            {
-                get => dictionary.objectsArray[index].Value;
-                set => throw new NotSupportedException();
-            }
+            public TValue this[int index] => dictionary.objectsArray[index].Value;
 
             [StructLayout(LayoutKind.Sequential)]
             private struct Enumerator : IEnumerator<TValue>
@@ -1043,9 +1022,7 @@ namespace NOption.Collections
 
             public CollectionDebuggerProxy(ICollection<T> collection)
             {
-                if (collection == null)
-                    throw new ArgumentNullException(nameof(collection));
-                this.collection = collection;
+                this.collection = collection ?? throw new ArgumentNullException(nameof(collection));
             }
 
             [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
@@ -1066,9 +1043,7 @@ namespace NOption.Collections
 
             public DebuggerProxy(IDictionary<TKey, TValue> dictionary)
             {
-                if (dictionary == null)
-                    throw new ArgumentNullException(nameof(dictionary));
-                this.dictionary = dictionary;
+                this.dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
             }
 
             [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
