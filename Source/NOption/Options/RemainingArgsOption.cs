@@ -79,9 +79,7 @@ namespace NOption
             string argStr = args[argIndex];
 
             Option unaliasedOption = UnaliasedOption;
-            string spelling = (Id == unaliasedOption.Id)
-                ? argStr.Substring(0, argLen)
-                : unaliasedOption.PrefixedName;
+            string spelling = argStr.Substring(0, argLen);
 
             // Require exact match.
             if (argLen != argStr.Length)

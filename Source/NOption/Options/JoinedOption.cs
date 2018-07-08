@@ -79,11 +79,9 @@ namespace NOption
             string argStr = args[argIndex];
 
             Option unaliasedOption = UnaliasedOption;
-            string spelling = (Id == unaliasedOption.Id)
-                ? argStr.Substring(0, argLen)
-                : unaliasedOption.PrefixedName;
-
+            string spelling = argStr.Substring(0, argLen);
             string value = argStr.Substring(argLen);
+
             return new Arg(unaliasedOption, spelling, argIndex++, value);
         }
     }

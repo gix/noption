@@ -86,9 +86,7 @@ namespace NOption
             IReadOnlyList<string> args, ref int argIndex, int argLen)
         {
             Option unaliasedOption = UnaliasedOption;
-            string spelling = (Id == unaliasedOption.Id)
-                ? args[argIndex].Substring(0, argLen)
-                : unaliasedOption.PrefixedName;
+            string spelling = args[argIndex].Substring(0, argLen);
 
             return new Arg(unaliasedOption, spelling, argIndex++);
         }

@@ -78,15 +78,13 @@ namespace NOption
             IReadOnlyList<string> args, ref int argIndex, int argLen)
         {
             string argStr = args[argIndex];
-            if (argLen == argStr.Length)
+            if (argStr.Length == argLen)
                 return base.AcceptCore(args, ref argIndex, argLen);
 
             Option unaliasedOption = UnaliasedOption;
-            string spelling = (Id == unaliasedOption.Id)
-                ? argStr.Substring(0, argLen)
-                : unaliasedOption.PrefixedName;
-
+            string spelling = argStr.Substring(0, argLen);
             string value = argStr.Substring(argLen);
+
             return new Arg(unaliasedOption, spelling, argIndex++, value);
         }
     }
