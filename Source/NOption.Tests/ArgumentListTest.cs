@@ -1,4 +1,4 @@
-﻿namespace NOption.Tests
+namespace NOption.Tests
 {
     using System;
     using System.Collections;
@@ -162,6 +162,22 @@
         }
 
         [Fact]
+        public void HasArgN()
+        {
+            var al = CreateArgumentList(
+                new Arg(optTable.GetOption(OptA), "-a", 0),
+                new Arg(optTable.GetOption(OptB), "-b", 1),
+                new Arg(optTable.GetOption(OptA), "-a", 2),
+                new Arg(optTable.GetOption(OptC), "-c", 3));
+
+            Assert.True(al.HasArg(OptA, OptC, OptD));
+            Assert.True(al[0].IsClaimed);
+            Assert.False(al[1].IsClaimed);
+            Assert.True(al[2].IsClaimed);
+            Assert.True(al[3].IsClaimed);
+        }
+
+        [Fact]
         public void HasArgNoClaim()
         {
             var al = CreateArgumentList(
@@ -288,36 +304,6 @@
         }
 
         [Fact]
-        public void GetLastArg2()
-        {
-            var args = new[] {
-                new Arg(optTable.GetOption(OptA), "-a", 0),
-                new Arg(optTable.GetOption(OptB), "-b", 1),
-                new Arg(optTable.GetOption(OptC), "-c=", 2, "2"),
-                new Arg(optTable.GetOption(OptA), "-a", 4),
-            };
-            var al = CreateArgumentList(args);
-
-            Assert.Null(al.GetLastArg(OptD, OptE));
-            Assert.False(al[0].IsClaimed);
-            Assert.False(al[1].IsClaimed);
-            Assert.False(al[2].IsClaimed);
-            Assert.False(al[3].IsClaimed);
-
-            Assert.Same(args[3], al.GetLastArg(OptA, OptB));
-            Assert.True(al[0].IsClaimed);
-            Assert.True(al[1].IsClaimed);
-            Assert.False(al[2].IsClaimed);
-            Assert.True(al[3].IsClaimed);
-
-            Assert.Same(args[2], al.GetLastArg(OptC, OptD));
-            Assert.True(al[0].IsClaimed);
-            Assert.True(al[1].IsClaimed);
-            Assert.True(al[2].IsClaimed);
-            Assert.True(al[3].IsClaimed);
-        }
-
-        [Fact]
         public void GetLastArgN()
         {
             var args = new[] {
@@ -363,7 +349,7 @@
         }
 
         [Fact]
-        public void GetLastArgNoClaim2()
+        public void GetLastArgNoClaimN()
         {
             var args = new[] {
                 new Arg(optTable.GetOption(OptA), "-a", 0),

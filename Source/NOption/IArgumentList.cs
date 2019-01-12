@@ -34,6 +34,19 @@ namespace NOption
         bool HasArg(OptSpecifier id);
 
         /// <summary>
+        ///   Determines whether the argument list has any arguments matching the
+        ///   specified <paramref name="ids"/> and claims all such arguments.
+        /// </summary>
+        /// <param name="ids">
+        ///   The option ids to look for.
+        /// </param>
+        /// <returns>
+        ///   <see langword="true"/> if any argument matches <paramref name="ids"/>,
+        ///   otherwise <see langword="false"/>.
+        /// </returns>
+        bool HasArg(params OptSpecifier[] ids);
+
+        /// <summary>
         ///   Determines whether the argument list has any arguments matching
         ///   the specified <paramref name="id"/> without claiming any.
         /// </summary>
@@ -126,22 +139,6 @@ namespace NOption
         ///   Gets the last argument matching any of the specified ids. Claims
         ///   all matching arguments.
         /// </summary>
-        /// <param name="id1">
-        ///   The first option id to look for.
-        /// </param>
-        /// <param name="id2">
-        ///   The second option id to look for.
-        /// </param>
-        /// <returns>
-        ///   The last argument or <see langword="null"/> if no argument matches
-        ///   any id.
-        /// </returns>
-        Arg GetLastArg(OptSpecifier id1, OptSpecifier id2);
-
-        /// <summary>
-        ///   Gets the last argument matching any of the specified ids. Claims
-        ///   all matching arguments.
-        /// </summary>
         /// <param name="ids">
         ///   The option ids to look for.
         /// </param>
@@ -168,17 +165,14 @@ namespace NOption
         ///   Gets the last argument matching any of the specified ids without
         ///   claiming it.
         /// </summary>
-        /// <param name="id1">
-        ///   The first option id to look for.
-        /// </param>
-        /// <param name="id2">
-        ///   The second option id to look for.
+        /// <param name="ids">
+        ///   The option ids to look for.
         /// </param>
         /// <returns>
         ///   The last matching argument or <see langword="null"/> if no argument
         ///   matches.
         /// </returns>
-        Arg GetLastArgNoClaim(OptSpecifier id1, OptSpecifier id2);
+        Arg GetLastArgNoClaim(params OptSpecifier[] ids);
 
         /// <summary>
         ///   Gets the value of the last argument matching the specified id, or

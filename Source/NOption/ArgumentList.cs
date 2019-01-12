@@ -87,6 +87,11 @@ namespace NOption
             return GetLastArg(id) != null;
         }
 
+        public bool HasArg(params OptSpecifier[] ids)
+        {
+            return GetLastArg(ids) != null;
+        }
+
         public bool HasArgNoClaim(OptSpecifier id)
         {
             return GetLastArgNoClaim(id) != null;
@@ -130,18 +135,6 @@ namespace NOption
             return lastArg;
         }
 
-        public Arg GetLastArg(OptSpecifier id1, OptSpecifier id2)
-        {
-            Arg lastArg = null;
-            foreach (var arg in args) {
-                if (arg.Option.Matches(id1) || arg.Option.Matches(id2)) {
-                    arg.Claim();
-                    lastArg = arg;
-                }
-            }
-            return lastArg;
-        }
-
         public Arg GetLastArg(params OptSpecifier[] ids)
         {
             if (ids == null)
@@ -167,11 +160,11 @@ namespace NOption
             return null;
         }
 
-        public Arg GetLastArgNoClaim(OptSpecifier id1, OptSpecifier id2)
+        public Arg GetLastArgNoClaim(params OptSpecifier[] ids)
         {
             for (int i = args.Count - 1; i >= 0; --i) {
                 var arg = args[i];
-                if (arg.Option.Matches(id1) || arg.Option.Matches(id2))
+                if (ids.Any(id => arg.Option.Matches(id)))
                     return arg;
             }
             return null;
